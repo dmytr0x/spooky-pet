@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spooky Pet</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <div id="root" class="idle">
+      <div id="speech">
+        <svg class="cloud" viewBox="0 0 272 150" preserveAspectRatio="none" aria-hidden="true">
+          <g fill="currentColor">
+            <ellipse cx="136" cy="68" rx="108" ry="54" />
+            <circle cx="78" cy="32" r="30" />
+            <circle cx="136" cy="24" r="28" />
+            <circle cx="194" cy="32" r="30" />
+            <circle cx="36" cy="60" r="28" />
+            <circle cx="44" cy="104" r="26" />
+            <circle cx="236" cy="58" r="28" />
+            <circle cx="228" cy="102" r="26" />
+            <circle cx="90" cy="118" r="22" />
+            <circle cx="172" cy="116" r="20" />
+            <ellipse cx="122" cy="126" rx="18" ry="16" />
+            <circle cx="116" cy="142" r="11" />
+          </g>
+        </svg>
+        <p id="speech-text"></p>
+        <span class="orb orb-1"></span>
+        <span class="orb orb-2"></span>
+        <span class="orb orb-3"></span>
+      </div>
+      <img id="pet" src="./pet.png" alt="" draggable="false" />
+    </div>
+    <audio id="sfx-lurk" src="./sfx/lurk.wav" preload="auto"></audio>
+    <audio id="sfx-speak" src="./sfx/speak.wav" preload="auto"></audio>
+  </body>
+</html>

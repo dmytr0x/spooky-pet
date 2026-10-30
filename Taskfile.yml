@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  SETTINGS_DIR: '{{.HOME}}/Library/Application Support/fun.spooky-pet'
+  SETTINGS_FILE: '{{.SETTINGS_DIR}}/settings.json'
+  APP_BUNDLE: src-tauri/target/release/bundle/macos/Spooky Pet.app
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  setup:
+    desc: Install npm deps and Rust fmt/clippy components
+    cmds:
+      - rustup component add rustfmt clippy
+      - npm install
+
+  dev:
+    desc: Run the overlay with hot reload (daily loop)
+    aliases: [run]
+    interactive: true
+    cmds:
+      - npm run tauri -- dev
+
+  build:
+    desc: Build an unsigned .app (no DMG, no signing)
+    cmds:
+      - npm run tauri -- build --bundles app --no-sign
+      - echo "Built {{.APP_BUNDLE}}"
+
+  build:debug:
+    desc: Build an unsigned debug .app
+    cmds:
+      - npm run tauri -- build --debug --bundles app --no-sign
+
+  open:
+    desc: Launch the last unsigned release .app
+    platforms: [darwin]
+    preconditions:
+      - sh: test -d "{{.APP_BUNDLE}}"
+        msg: "No release bundle yet. Run `task build` first."
+    cmds:
+      - open "{{.APP_BUNDLE}}"
+
+  check:
+    desc: Type-check the Rust host
+    dir: src-tauri
+    cmds:
+      - cargo check
+
+  fmt:
+    desc: Format Rust sources
+    dir: src-tauri
+    cmds:
+      - cargo fmt
+
+  fmt:check:
+    desc: Check Rust formatting without writing
+    dir: src-tauri
+    cmds:
+      - cargo fmt -- --check
+
+  lint:
+    desc: Lint Rust with clippy
+    aliases: [clippy]
+    dir: src-tauri
+    cmds:
+      - cargo clippy --all-targets -- -D warnings
+
+  test:
+    desc: Run Rust tests
+    dir: src-tauri
+    cmds:
+      - cargo test
+
+  verify:
+    desc: Format-check, clippy, and test
+    aliases: [ci]
+    cmds:
+      - task: fmt:check
+      - task: lint
+      - task: test
+
+  clean:
+    desc: Remove Cargo target/ and Vite dist/
+    cmds:
+      - cargo clean --manifest-path src-tauri/Cargo.toml
+      - rm -rf dist
+
+  info:
+    desc: Show Tauri / Rust / Node environment
+    cmds:
+      - npm run tauri -- info
+
+  settings:
+    desc: Open settings.json in the default editor
+    aliases: [settings:open]
+    platforms: [darwin]
+    cmds:
+      - |
+        mkdir -p "{{.SETTINGS_DIR}}"
+        if [ ! -f "{{.SETTINGS_FILE}}" ]; then
+          echo "No settings.json yet. The app writes defaults on first launch."
+          echo "{{.SETTINGS_FILE}}"
+          exit 0
+        fi
+        open "{{.SETTINGS_FILE}}"
+
+  settings:path:
+    desc: Print the settings.json path
+    platforms: [darwin]
+    cmds:
+      - echo "{{.SETTINGS_FILE}}"
+
+  settings:reveal:
+    desc: Reveal the config dir in Finder
+    platforms: [darwin]
+    cmds:
+      - mkdir -p "{{.SETTINGS_DIR}}"
+      - open "{{.SETTINGS_DIR}}"
+
+  stop:
+    desc: Kill a leftover Spooky Pet process
+    aliases: [kill]
+    platforms: [darwin]
+    cmds:
+      - pkill -x spooky-pet || true
+      - killall "Spooky Pet" 2>/dev/null || true
